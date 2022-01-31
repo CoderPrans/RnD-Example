@@ -1,14 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Rnd } from "react-rnd";
-
-const style = {
-  display: "flex",
-  flexDirection: 'column',
-  alignItems: "center",
-  justifyContent: "space-between",
-  border: "solid 1px #ddd",
-  fontFamily: 'sans-serif',
-};
+import './App.css';
 
 // layout
 // {name: "Layout 1", metadata: [{pos: {x, y, width, height}, color: }, {pos: {x, y, width, height}, color: },... ]}
@@ -33,7 +25,7 @@ function App(props) {
 function LayoutHandler(props) {
     const exampleRect = {x: 10, y: 10, width: 100, height: 100};
     const [posns, setPosns] = useState(mockLayout.data);
-    const [name, setName] = useState("New Layout");
+    const [name, setName] = useState("");
     const [selected, setSelected] = useState('');
     const [layoutOptions, setLayoutOptions] = useState();
 
@@ -45,22 +37,19 @@ function LayoutHandler(props) {
             setLayoutOptions(savedLayouts);
             setPosns(savedLayouts[0].data);
             setSelected(savedLayouts[0].name);
+            setName(selected);
         }
         else {
             localStorage.setItem('layouts', JSON.stringify([mockLayout]));
             setLayoutOptions([mockLayout]);
             setPosns(mockLayout.data);
             setSelected(mockLayout.name);
+            setName(selected);
         }
 
     }, []);
 
     useEffect(() => {
-        // let getSelectedLayout = JSON.parse(localStorage.getItem('layouts'));
-        // console.log(getSelectedLayout);
-        // let pick = getSelectedLayout.length && getSelectedLayout.filter(l => l.name === selected)[0];
-        // console.log(pick && pick.data);
-        // setPosns(pick && pick.data);
         console.log(layoutOptions);
         let pick = layoutOptions?.length && layoutOptions.filter(l => l.name === selected)[0];
 
@@ -74,32 +63,21 @@ function LayoutHandler(props) {
 
     function getRandomRect() {
         return {meta: {
-            x: parseInt(Math.random() * 1100),
+            x: parseInt(Math.random() * 610),
             y: parseInt(Math.random() * 400),
             width: 100,
             height: 100
-        }, id: parseInt(Math.random() * 1100) + posns.length};
+        }, id: parseInt(Math.random() * 610) + posns.length};
     }
 
-    // function fetchLayouts() {
-    //     let getSelectedLayout = JSON.parse(localStorage.getItem('layouts')) || [];
-    //     setLayoutOptions(getSelectedLayout);
-    //     return getSelectedLayout;
-    // }
-
     function handleLayoutDelete(name) {
-        // let getSelectedLayout = JSON.parse(localStorage.getItem('layouts'));
-        // let updatedLayouts = getSelectedLayout.filter(l => l.name !== name);
-        // localStorage.setItem('layouts', JSON.stringify(updatedLayouts));
         let updatedLayouts = layoutOptions.filter(l => l.name !== name);
         setLayoutOptions(updatedLayouts);
     }
     
     function handleSave() {
-        setLayoutOptions([...layoutOptions, {name: name, data: posns}]);
-
-        // let savedLayouts = JSON.parse(localStorage.getItem('layouts'));
-        // localStorage.setItem('layouts', JSON.stringify([...savedLayouts, {name: name, data: posns}]));
+        setLayoutOptions([...layoutOptions, {name: name.length ? name : new Date().toString(), data: posns}]);
+        setName("");
     }
     
     function handleSet(set, i) {
@@ -113,29 +91,24 @@ function LayoutHandler(props) {
     }
 
     return (
-        <div>
-          <h1>{posns && posns.name}</h1>
-          <input type="text" placeholder="layout name" value={name} onChange={(e) => setName(e.target.value)} />
-          <button onClick={handleSave}>Save Layout</button>
-          <div>
-            {layoutOptions && layoutOptions
-             .map(l =>
-                 <div>
-                   <p style={{cursor: 'pointer'}} key={l.name} onClick={() => setSelected(l.name)} value={l.name}>{l.name}</p>
-                   <button onClick={() => handleLayoutDelete(l.name)}>Del</button>
-                 </div>
-             )}
+        <div style={{display: 'flex', justifyContent: 'space-around', marginTop: '40px'}}>
+          <div style={{width: '400px'}}>
+            <h1>{posns && posns.name}</h1>
+            <input type="text" placeholder="layout name" value={name} onChange={(e) => setName(e.target.value)} />
+            <button onClick={handleSave}>Save Layout</button>
+            <div>
+              {layoutOptions && layoutOptions
+               .map(l =>
+                   <div style={{display: 'flex', justifyContent: 'space-between', margin: '10px', alignItems: 'center'}}>
+                     <p style={{cursor: 'pointer', margin: 0, textDecoration: selected === l.name && 'underline'}} key={l.name} onClick={() => setSelected(l.name)} value={l.name}>{l.name}</p>
+                     <button onClick={() => handleLayoutDelete(l.name)}>Del</button>
+                   </div>
+               )}
+            </div>
+            <button onClick={() => setPosns([...posns, getRandomRect()])}>Add New Rectangle</button>
+            <button onClick={() => setPosns([])}>Clear Area</button>
           </div>
-          {/* <select value={selected} > */}
-          {/*   {JSON.parse(localStorage.getItem('layouts'))?.length */}
-          {/*    && JSON.parse(localStorage.getItem('layouts')) */}
-          {/*    .map(l => */}
-          {/*        <option key={l.name} value={l.name}>{l.name}</option> */}
-          {/*    )} */}
-          {/* </select> */}
-          <button onClick={() => setPosns([...posns, getRandomRect()])}>Add New Rectangle</button>
-          <button onClick={() => setPosns([])}>Clear Area</button>
-          <div style={{width: '1200px', height: '500px', background: 'lightblue', margin: '20px auto'}}>
+          <div style={{width: '710px', height: '500px', background: 'lightblue'}}>
             {posns && posns.map((c, i) =>
                 <Card
                   key={c.id}
@@ -155,6 +128,14 @@ function Card({state, setState, ...props}) {
     const colors = ['red', 'lightgreen', 'orange', 'yellow'];
     
     const [color, setColor] = useState(colors[props.index % colors.length]);
+
+    const style = {
+        display: "flex",
+        flexDirection: 'column',
+        alignItems: "center",
+        justifyContent: "space-between",
+        border: "solid 1px #ddd",
+    };
 
     return (
         <Rnd
